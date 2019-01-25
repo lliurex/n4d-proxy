@@ -1,0 +1,3 @@
+[org/gnome/system/proxy]
+autoconfig-url='http://proxy/proxy/proxy.pac'
+mode='auto'

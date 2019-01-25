@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -e
+
+# main
+[ "$1" = "pre-cpkg" ] || exit 0
+
+# read vars
+VAR_LIST="PROXY_HOST PROXY_HTTP_PORT PROXY_PATH"
+eval `/usr/sbin/llxcfg-showvars ${VAR_LIST}`
+
+# calculate vars
+PROXY_ENABLED="false"
+PROXY_MODE="none"
+PROXY_AUTOCONFIG_URL=""
+if [ "$PROXY_HOST" -a "$PROXY_HTTP_PORT" ] ; then
+   PROXY_ENABLED="true"
+   if [ "$PROXY_PATH" ] ; then
+      PROXY_MODE="auto"
+      PROXY_AUTOCONFIG_URL="http://${PROXY_HOST}/${PROXY_PATH}/proxy.pac"
+   else
+      PROXY_MODE="manual"
+   fi
+fi
+
+# generate vars
+llxcfg-systemvars add PROXY_ENABLED="$PROXY_ENABLED" \
+                      PROXY_MODE="$PROXY_MODE" \
+                      PROXY_AUTOCONFIG_URL="$PROXY_AUTOCONFIG_URL"
+
+exit 0

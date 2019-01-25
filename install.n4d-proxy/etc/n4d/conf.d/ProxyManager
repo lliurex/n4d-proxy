@@ -1,0 +1,10 @@
+[SETUP]
+type=python
+path=ProxyManager.py
+class=N4dProxy
+[METHODS]
+test=*,anonymous
+backup=adm,admins
+restore=adm,admins
+load_exports=adm,admins
+reboot_proxy=adm,admins

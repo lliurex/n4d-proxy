@@ -1,0 +1,45 @@
+{
+	"INTERNAL_MASK": {
+		"packages": [
+			"n4d-proxy"
+		]
+	},
+	"SRV_IP": {
+		"packages": [
+			"n4d-proxy"
+		]
+	},
+	"PROXY_HOST": {
+		"function": "lliurex.variables.proxy_host.init", 
+		"packages": [
+			"n4d-proxy"
+		], 
+		"description": "set name for proxy server", 
+		"value": null
+	},
+	"PROXY_HTTP_PORT": {
+		"function": "lliurex.variables.proxy_http_port.init", 
+		"packages": [
+			"n4d-proxy"
+		], 
+		"description": "port used by the proxy", 
+		"value": null
+	},
+	"PROXY_ENABLED": {
+		"function": "lliurex.variables.proxy_enabled.init", 
+		"packages": [
+			"n4d-proxy"
+		], 
+		"description": "set if the proxy is enabled", 
+		"value": null
+	},
+	"PROXY_MAX_FILE_SIZE": {
+		"function": "lliurex.variables.proxy_max_file_size.init", 
+		"packages": [
+			"n4d-proxy"
+		], 
+		"description": "set the max file that will be cached", 
+		"value": null
+	}
+}
+

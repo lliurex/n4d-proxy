@@ -1,0 +1,19 @@
+#!/bin/bash
+
+logger -t "lliurex-squid-cleaner" "Cleaning system"
+if [ -f /var/spool/squid/swap.state ]; then
+	#:> /var/spool/squid/swap.state
+	FILENAME=/var/spool/squid/swap.state
+	SIZE=$(du -sb $FILENAME | awk '{ print $1 }')
+
+	if ((SIZE<4500000000)) ; then 
+	    logger -t "lliurex-squid-cleaner" "Size seems normal: Nothing to do" 
+	else 
+	    logger -t "lliurex-squid-cleaner" echo "Cleanup SQUID3"
+	    sudo service squid stop
+	    rm -f /var/spool/squid/swap.*
+	    sudo service squid start
+		
+	fi
+fi
+exit 0

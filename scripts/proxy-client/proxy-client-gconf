@@ -1,0 +1,27 @@
+#!/bin/sh
+
+VAR_LIST="PROXY_MODE PROXY_AUTOCONFIG_URL PROXY_HOST PROXY_HTTP_PORT"
+eval `/usr/sbin/llxcfg-showvars ${VAR_LIST}`
+
+if [ "$1" = "start" ] ; then
+   case $PROXY_MODE in
+      auto)
+         gconftool-2 --type string --set /system/proxy/autoconfig_url "$PROXY_AUTOCONFIG_URL"
+         gconftool-2 --type string --set /system/proxy/mode "auto"
+         gconftool-2 --type bool --set /system/http_proxy/use_http_proxy false
+         ;;
+      manual)
+         gconftool-2 --type string --set /system/http_proxy/host "$PROXY_HOST"
+         gconftool-2 --type int --set /system/http_proxy/port "$PROXY_PORT"
+         gconftool-2 --type bool --set /system/http_proxy/use_http_proxy true
+         gconftool-2 --type bool --set /system/http_proxy/use_same_proxy true
+         gconftool-2 --type string --set /system/proxy/mode "manual"
+         ;;
+      *)
+         gconftool-2 --type string --set /system/proxy/mode "none"
+         gconftool-2 --type bool --set /system/http_proxy/use_http_proxy false
+         ;;
+   esac
+fi
+
+exit 0
