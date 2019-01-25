@@ -1,0 +1,23 @@
+Source: n4d-proxy
+Section: admin
+Priority: optional
+Maintainer: Equipo LliureX <lliurex@gva.es>
+Build-Depends: debhelper (>= 8.0.0), n4d-dev
+Standards-Version: 3.8.7
+
+Package: n4d-proxy
+Pre-Depends: squid
+Depends:  ${shlibs:Depends}, ${misc:Depends}, python-jinja2, python-llxvars, squid
+Provides: n4d-proxy
+Replaces: n4d-proxy
+Conflicts: n4d-proxy
+Architecture: all
+Description: LliureX configuration for proxy server
+ Sets the basic proxy configuration for a LliureX server.
+
+Package: n4d-proxy-client
+Depends:  ${misc:Depends}
+Architecture: all
+Description: Lliurex configuration for proxy clients
+ Sets proxy configuration for LliureX network clients.
+

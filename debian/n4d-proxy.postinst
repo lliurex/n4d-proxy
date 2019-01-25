@@ -1,0 +1,132 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+   configure|upgrade)
+	#mkdir -p /var/run/squid
+	#chown proxy:proxy /var/run/squid
+   	#service dnsmasq restart || true
+   	a2ensite proxy || true
+	invoke-rc.d apache2 restart || true
+	
+	if dpkg --compare-versions "$2" lt 0.24; then
+		SSL_PORTS_FILE="/etc/squid/lliurex/allow-SSL-ports.conf"
+		
+		if [ -e  $SSL_PORTS_FILE ]; then
+		
+			echo "Fixing allowed SSL ports squid conffile..."
+		
+			sed -i -e "/^9779$/d" $SSL_PORTS_FILE
+			echo "\n9779\n" >> $SSL_PORTS_FILE
+			sed -i -e "/^$/d" $SSL_PORTS_FILE
+			
+			invoke-rc.d squid restart || true
+			
+		fi
+		
+	fi
+	
+	if dpkg --compare-versions "$2" lt 0.25; then
+		SSL_PORTS_FILE="/etc/squid/lliurex/allow-SSL-ports.conf"
+		SQUID_CONF="/etc/squid/squid.conf"
+		
+		if [ -e $SQUID_CONF ]; then
+		
+			echo "Fixing single-name resolution..."
+			
+			sed -i -e "/^dns_defnames .*/d" $SQUID_CONF
+			echo "\n\n# Lliurex - Enabling single-name resolution\ndns_defnames on\n" >> $SQUID_CONF
+			
+			invoke-rc.d squid restart || true
+		
+		fi
+	fi
+		
+	if dpkg --compare-versions "$2" lt 0.31; then
+		TEMPLATE_PATH="/usr/share/n4d/templates/squid/"
+		DENY_DOMAIN_FILE="/etc/squid/lliurex/deny-dst-domains.conf"
+		DENY_DOMAIN_FILE_EXPR="/etc/squid/lliurex/deny-dst-domains-expr.conf"
+		DENY_NETWORKS_FILE="/etc/squid/lliurex/deny-dst-networks.conf"
+		SQUID_CONF="/etc/squid/squid.conf"
+		SQUID_LLIUREX_DIR="/etc/squid/lliurex/"
+		if [ -e $SQUID_CONF ]; then
+			echo "Fixing htcp_access..."
+			sed -i -e "/^htcp_access .*/d" $SQUID_CONF
+			
+			if [ ! -e $DENY_DOMAIN_FILE  -a -d $SQUID_LLIUREX_DIR ]; then
+				cp "$TEMPLATE_PATH"deny-dst-domains.conf $DENY_DOMAIN_FILE
+			fi
+			if [ ! -e $DENY_NETWORKS_FILE -a -d $SQUID_LLIUREX_DIR ]; then
+				cp "$TEMPLATE_PATH"deny-dst-networks.conf $DENY_NETWORKS_FILE
+			fi
+			if [ ! -e $DENY_DOMAIN_FILE_EXPR  -a -d $SQUID_LLIUREX_DIR ]; then
+				cp "$TEMPLATE_PATH"deny-dst-domains-expr.conf $DENY_DOMAIN_FILE_EXPR
+			fi
+			echo "adding deny domain file list..."
+			sed -i '/acl deny_domain dstdomain \"\/etc\/squid\/lliurex\/deny-dst-domains.conf\"/i acl deny_domain_expr dstdom_regex \"\/etc\/squid\/lliurex\/deny-dst-domains-expr.conf\"' $SQUID_CONF
+			echo "adding deny domain expresions acl..."
+			sed -i '/^http_access deny deny_domain/i http_access deny deny_domain_expr ' $SQUID_CONF
+		fi
+	fi
+	
+	if dpkg --compare-versions "$2" lt 0.50; then
+		SQUID_FILE="/etc/squid/squid.conf"
+		
+		if [ -e  $SQUID_FILE ]; then
+		
+			echo "Fixing dns_nameserver in squid conffile..."
+			sed -i -e "/^dns_nameservers 127.0.0.1/d" $SQUID_FILE
+			
+		fi
+		
+	fi
+	
+
+        PKG="n4d-proxy"
+        ORIGINAL_FILE="/etc/squid/squid.conf"
+        NEW_DIVERTED_FILE="/etc/squid/squid.conf.diverted"
+        DPKG_NEW_FILE="/etc/squid/squid.conf.dpkg-old"
+
+
+        if [ ! -e "$NEW_DIVERTED_FILE" ]; then
+
+                dpkg-divert --add --package ${PKG} --rename --divert "$NEW_DIVERTED_FILE" "$ORIGINAL_FILE"
+
+                if [ -e "$DPKG_NEW_FILE" ]; then
+
+                        RC=0
+                        grep "LLIUREX" "$DPKG_NEW_FILE" || RC=1
+
+                        if [ "$RC" = "0" ]; then
+
+                                mv "$DPKG_NEW_FILE" "$ORIGINAL_FILE"
+
+                        fi
+
+                fi
+
+                if [ ! -e "$ORIGINAL_FILE" ]; then
+                        cp "$NEW_DIVERTED_FILE" "$ORIGINAL_FILE"
+                fi
+
+
+        fi
+
+
+
+	n4d-modules enable-plugin /etc/n4d/conf.d/ProxyManager || true
+
+	invoke-rc.d squid restart || true
+	;;
+   abort-upgrade|abort-remove|abort-deconfigure)
+	;;
+  *)
+    echo "postinst called with unknown argument \`$1'" >&2
+    exit 1
+  ;;
+esac
+
+#DEBHELPER#
+
+exit 0
