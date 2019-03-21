@@ -1,3 +1,9 @@
+n4d-proxy (0.53.1) bionic; urgency=medium
+
+  * Fix syntax
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Thu, 21 Mar 2019 13:54:36 +0100
+
 n4d-proxy (0.53) bionic; urgency=medium
 
   * Add parameter to reduce shutdown time
